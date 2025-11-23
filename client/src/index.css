@@ -1,0 +1,198 @@
+/* =============== FULL SOFTY PINKO + YOUR BLUE THEME =============== */
+
+@import url("https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900");
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  font-family: "Raleway", sans-serif;
+  background-color: #fff;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+ul, li { list-style: none; }
+a { text-decoration: none !important; }
+
+/* SOFTY PINKO GLOBAL STYLES */
+.section {
+  position: relative;
+  padding-top: 100px;
+  padding-bottom: 80px;
+}
+.center-heading {
+  text-align: center;
+}
+.center-heading .section-title {
+  font-weight: 500;
+  font-size: 28px;
+  color: #1e1e1e;
+  letter-spacing: 1.75px;
+  line-height: 38px;
+  margin-bottom: 20px;
+}
+.center-text {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+  line-height: 28px;
+  margin-bottom: 50px;
+}
+
+/* BUTTONS - OVERRIDDEN TO BLUE */
+a.main-button,
+button.main-button {
+  font-size: 13px;
+  border-radius: 20px;
+  padding: 12px 20px;
+  background-color: #3498db;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: 0.25px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+a.main-button:hover,
+button.main-button:hover {
+  background-color: #2980b9;
+}
+
+/* HEADER */
+.header-area {
+  position: fixed;
+  top: 30px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+.header-area .main-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  padding: 0 30px;
+  height: 80px;
+}
+.header-area .logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #3498db;
+}
+.header-area .nav {
+  display: flex;
+  gap: 20px;
+}
+.header-area .nav a {
+  font-weight: 500;
+  font-size: 13px;
+  color: #1e1e1e;
+  letter-spacing: 1px;
+}
+.header-area .nav a:hover {
+  color: #2980b9;
+}
+
+/* HERO */
+.welcome-area {
+  background: url('/images/banner-bg.png') center center no-repeat;
+  background-size: cover;
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 100px;
+  color: white;
+}
+.welcome-area .header-text {
+  text-align: center;
+  padding: 0 20px;
+}
+.welcome-area .header-text h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+.welcome-area .header-text p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+/* FEATURES / POSTS */
+.features-small-item {
+  background: #fff;
+  box-shadow: 0 2px 48px rgba(0,0,0,0.1);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+.features-small-item .icon {
+  width: 90px;
+  height: 90px;
+  line-height: 90px;
+  margin: auto 0 30px;
+  background: #3498db;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+}
+.features-small-item .features-title {
+  font-size: 18px;
+  color: #1e1e1e;
+  margin-bottom: 15px;
+}
+.features-small-item p {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* FOOTER */
+footer {
+  background-image: linear-gradient(127deg, #2980b9 0%, #3498db 91%);
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 60px;
+  color: white;
+}
+footer .copyright {
+  margin-top: 20px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.88px;
+}
+
+/* GRID */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+.col-lg-4 {
+  flex: 0 0 33.333%;
+  padding: 0 15px;
+  margin-bottom: 30px;
+}
+@media (max-width: 992px) {
+  .col-lg-4 { flex: 0 0 50%; }
+}
+@media (max-width: 768px) {
+  .col-lg-4 { flex: 0 0 100%; }
+  .header-area .main-nav { flex-direction: column; gap: 10px; padding: 15px; }
+  .welcome-area { margin-top: 80px; height: 50vh; }
+}
+
+/* HIDE PRELOADER */
+#preloader { display: none; }

@@ -1,117 +1,50 @@
-import { useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function Profile() {
-  const { userId } = useParams()
-  const [user, setUser] = useState(null)
-  const [workouts, setWorkouts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { user, logout } = useAuth();
+  const [ownWorkouts, setOwnWorkouts] = useState([]);
 
   useEffect(() => {
-    console.log('Profile userId:', userId) // Debug
-    
-    // Get ALL workouts first, then extract user info from workouts
-    fetch('http://localhost:3030/data/workouts')
-      .then(r => {
-        if (r.status === 404) return [] // Handle no workouts yet
-        if (!r.ok) throw new Error('Server error')
-        return r.json()
-      })
-      .then(allWorkouts => {
-        console.log('All workouts:', allWorkouts)
-        
-        // Filter workouts by author ID
-        const userWorkouts = Array.isArray(allWorkouts) 
-          ? allWorkouts.filter(w => w.author && w.author._id === userId)
-          : []
-        console.log('User workouts:', userWorkouts)
-        
-        // If we found workouts, extract user info from first workout
-        if (userWorkouts.length > 0) {
-          setUser(userWorkouts[0].author) // Use author info from workout
-        } else {
-          // If no workouts but we have userId, create a basic user object
-          setUser({ username: 'User', _id: userId })
-        }
-        
-        setWorkouts(userWorkouts)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.log('Profile error:', err)
-        // Create basic user object even on error
-        setUser({ username: 'User', _id: userId })
-        setWorkouts([])
-        setLoading(false)
-      })
-  }, [userId])
+    if (!user) return;
+    fetch(`http://localhost:3030/data/workouts?where=_ownerId%3D%22${encodeURIComponent(user.email)}%22`)
+      .then(res => res.json())
+      .then(data => setOwnWorkouts(Array.isArray(data) ? data : []))
+      .catch(() => setOwnWorkouts([]));
+  }, [user]);
 
-  if (loading) {
-    return (
+  const handleLogout = () => {
+    logout();
+  };
+
+  if (!user) return <main>Loading...</main>;
+
+  return (
+    <main>
       <section className="section">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12 text-center">
-              <div className="loading">Loading profile...</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  return user ? (
-    <section className="section">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="section-heading">
-              <h2>{user.username}'s <em>Profile</em></h2>
-              <p>Workouts created by {user.username}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="row">
-          {workouts.length > 0 ? (
-            workouts.map(w => (
-              <div key={w._id} className="col-lg-4">
-                <div className="features-small-item">
-                  <div className="icon">
-                    <i className="fas fa-dumbbell"></i>
-                  </div>
-                  <h5 className="features-title">{w.title}</h5>
-                  <p>{w.description}</p>
-                  <p><small>{w.difficulty} • {w.duration}</small></p>
-                  <a href={`/workouts/${w._id}`} className="main-button">
-                    View Workout
-                  </a>
-                </div>
-              </div>
-            ))
+        <h1 className="section-title">Your Profile</h1>
+        <p><strong>Email:</strong> {user.email}</p>
+        <div style={{ marginTop: '1.5rem' }}>
+          <h2>Your Workouts ({ownWorkouts.length})</h2>
+          {ownWorkouts.length === 0 ? (
+            <p>You haven’t created any workouts yet.</p>
           ) : (
-            <div className="col-lg-12 text-center">
-              <div className="features-small-item">
-                <h5>No Workouts Created Yet</h5>
-                <p>{user.username} hasn't created any workouts yet.</p>
-              </div>
-            </div>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {ownWorkouts.map(w => (
+                <li key={w._id} style={{ marginBottom: '0.8rem' }}>
+                  <Link to={`/workout/${w._id}`}>{w.title}</Link>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
-      </div>
-    </section>
-  ) : (
-    <section className="section">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-12 text-center">
-            <div className="features-small-item">
-              <h5>User Not Found</h5>
-              <p>The requested user profile doesn't exist.</p>
-            </div>
-          </div>
+        <div style={{ marginTop: '2rem' }}>
+          <button onClick={() => logout()} className="btn btn-primary" style={{ background: '#e74c3c' }}>
+            Logout
+          </button>
         </div>
-      </div>
-    </section>
-  )
+      </section>
+    </main>
+  );
 }

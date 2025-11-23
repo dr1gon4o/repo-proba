@@ -1,26 +1,59 @@
-import { createContext, useState, useContext } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react';
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext)
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')))
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData, token) => {
-    const userObj = { ...userData, accessToken: token }
-    localStorage.setItem('user', JSON.stringify(userObj))
-    setUser(userObj)
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const email = localStorage.getItem('userEmail');
+    if (token && email) {
+      setUser({ email, accessToken: token });
+    }
+    setLoading(false);
+  }, []);
+
+  async function register(email, password) {
+    const res = await fetch('http://localhost:3030/users/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Registration failed');
+    localStorage.setItem('authToken', data.accessToken);
+    localStorage.setItem('userEmail', data.email);
+    setUser({ email: data.email, accessToken: data.accessToken });
   }
 
-  const logout = () => {
-    localStorage.removeItem('user')
-    setUser(null)
+  async function login(email, password) {
+    const res = await fetch('http://localhost:3030/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    localStorage.setItem('authToken', data.accessToken);
+    localStorage.setItem('userEmail', data.email);
+    setUser({ email: data.email, accessToken: data.accessToken });
   }
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userEmail');
+    setUser(null);
+  }
+
+  const value = { user, register, login, logout };
+
+  if (loading) return <div>Loading...</div>;
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -1,75 +1,48 @@
-import { useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function WorkoutDetails() {
-  const { id } = useParams()
-  const [workout, setWorkout] = useState(null)
-  const { user } = useAuth()
+  const { workoutId } = useParams();
+  const [workout, setWorkout] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:3030/data/workouts/${id}`)
-      .then(r => r.json())
-      .then(setWorkout)
-      .catch(err => console.log('Error fetching workout:', err))
-  }, [id])
+    fetch(`http://localhost:3030/data/workouts/${workoutId}`)
+      .then(res => res.json())
+      .then(data => setWorkout(data))
+      .catch(() => navigate('/'));
+  }, [workoutId, navigate]);
 
-  const deleteWorkout = () => {
-    if (confirm('Delete this workout?')) {
-      fetch(`http://localhost:3030/data/workouts/${id}`, {
-        method: 'DELETE', 
-        headers: { 'X-Authorization': user.accessToken }
-      }).then(() => window.location.href = '/')
-    }
-  }
+  const handleDelete = () => {
+    if (!window.confirm('Are you sure you want to delete this workout?')) return;
+    fetch(`http://localhost:3030/data/workouts/${workoutId}`, {
+      method: 'DELETE',
+      headers: { 'X-Authorization': user.accessToken }
+    })
+      .then(() => navigate('/'));
+  };
 
-  // DEBUG: Check if user can edit
-  console.log('Current user:', user)
-  console.log('Workout author:', workout?.author)
-  console.log('Can edit:', user && workout && user._id === workout.author?._id)
+  if (!workout) return <main>Loading...</main>;
 
-  return workout ? (
-    <section className="section">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-8 offset-lg-2">
-            <div className="features-small-item">
-              <div className="section-heading" style={{textAlign: 'left', marginBottom: '30px'}}>
-                <h2>{workout.title}</h2>
-                <p>By {workout.author?.username} • {workout.difficulty} • {workout.duration}</p>
-              </div>
-              
-              <div className="left-text">
-                <div style={{whiteSpace: 'pre-line', lineHeight: '1.8', fontSize: '15px'}}>
-                  {workout.content}
-                </div>
-              </div>
-
-              {/* EDIT/DELETE BUTTONS - FIXED CONDITION */}
-              {user && workout.author && user._id === workout.author._id && (
-                <div style={{marginTop: '40px', textAlign: 'center'}}>
-                  <a href={`/edit/${workout._id}`} className="main-button" style={{marginRight: '15px'}}>
-                    Edit Workout
-                  </a>
-                  <button onClick={deleteWorkout} className="main-button">
-                    Delete Workout
-                  </button>
-                </div>
-              )}
-            </div>
+  return (
+    <main>
+      <section className="section">
+        <h1 className="section-title">{workout.title}</h1>
+        {workout.imageUrl && <img src={workout.imageUrl} alt={workout.title} style={{ width: '100%', borderRadius: '10px', marginBottom: '1rem' }} />}
+        <p>{workout.description}</p>
+        {user?.email === workout._ownerId && (
+          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+            <button onClick={() => navigate(`/edit/${workoutId}`)} className="btn btn-primary">
+              Edit
+            </button>
+            <button onClick={handleDelete} className="btn btn-primary" style={{ background: '#e74c3c' }}>
+              Delete
+            </button>
           </div>
-        </div>
-      </div>
-    </section>
-  ) : (
-    <section className="section">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-12 text-center">
-            <div className="loading">Loading workout...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
+        )}
+      </section>
+    </main>
+  );
 }

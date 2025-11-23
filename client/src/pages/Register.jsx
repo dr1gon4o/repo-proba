@@ -1,66 +1,66 @@
-import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
-  const [form, setForm] = useState({ email: '', password: '', username: '' })
-  const { login } = useAuth()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rePass, setRePass] = useState('');
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
-  const submit = (e) => {
-    e.preventDefault()
-    fetch('http://localhost:3030/users/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.accessToken) {
-        login(data, data.accessToken)
-        window.location.href = '/'
-      }
-    })
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== rePass) return alert('Passwords do not match');
+    try {
+      await register(email, password);
+      navigate('/');
+    } catch (err) {
+      alert(err.message || 'Registration failed');
+    }
+  };
 
   return (
-    <section className="section" id="contact-us">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-6 offset-lg-3">
-            <div className="section-heading">
-              <h2>Join <em>StreetFit</em></h2>
-              <p>Create your account and start sharing workouts</p>
-            </div>
+    <main>
+      <section className="section">
+        <h1 className="section-title">Register</h1>
+        <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '0 auto' }}>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
           </div>
-          <div className="col-lg-6 offset-lg-3">
-            <form className="contact-form" onSubmit={submit}>
-              <input 
-                type="text" 
-                value={form.username} 
-                onChange={e => setForm({...form, username: e.target.value})} 
-                placeholder="Your Username" 
-                required 
-              />
-              <input 
-                type="email" 
-                value={form.email} 
-                onChange={e => setForm({...form, email: e.target.value})} 
-                placeholder="Your Email" 
-                required 
-              />
-              <input 
-                type="password" 
-                value={form.password} 
-                onChange={e => setForm({...form, password: e.target.value})} 
-                placeholder="Your Password" 
-                required 
-              />
-              <button type="submit" className="main-button">
-                Register Now
-              </button>
-            </form>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-input"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
           </div>
-        </div>
-      </div>
-    </section>
-  )
+          <div className="form-group">
+            <label className="form-label">Repeat Password</label>
+            <input
+              type="password"
+              className="form-input"
+              value={rePass}
+              onChange={e => setRePass(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">Register</button>
+          <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+            Already have an account? <Link to="/login" style={{ color: '#ff6f61' }}>Login</Link>
+          </p>
+        </form>
+      </section>
+    </main>
+  );
 }
